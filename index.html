@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OddTurnip Toolbox</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Page-specific styles for index */
+        .project-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        .project-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        .project-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .project-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+        .project-card p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 1em;
+        }
+        .project-card.coming-soon {
+            background: linear-gradient(135deg, #f8f8f8 0%, #f0f0f0 100%);
+            cursor: default;
+            opacity: 0.7;
+        }
+        .project-card.coming-soon:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .section-header .section-icon {
+            font-size: 1.5em;
+        }
+        .section-header h3 {
+            color: #333;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        .footer {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .footer .oddturnip-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .footer .oddturnip-link:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            text-decoration: none;
+        }
+        .footer .oddturnip-link .oddturnip-logo {
+            height: 24px;
+            width: auto;
+        }
+        @media (max-width: 768px) {
+            .project-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                Utilities
+            </h1>
+            <p>Handy tools for various tasks</p>
+        </header>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🖼️</span>
+                    <h3>Image Utilities</h3>
+                </div>
+                <div class="project-cards">
+                    <a href="sticker-maker.html" class="project-card">
+                        <div class="icon">🎨</div>
+                        <h3>Telegram Sticker Maker</h3>
+                        <p>Create 512px Telegram stickers with text overlay. Paste or upload an image, add text, then copy or download as PNG.</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <h3>Text Utilities</h3>
+                </div>
+                <div class="project-cards">
+                    <a href="word-count.html" class="project-card">
+                        <div class="icon">📝</div>
+                        <h3>Word Count</h3>
+                        <p>Count words, sentences, and paragraphs in your text. Perfect for essays, articles, and documents.</p>
+                    </a>
+
+                    <a href="character-count.html" class="project-card">
+                        <div class="icon">🔢</div>
+                        <h3>Character Count</h3>
+                        <p>Analyze character frequency and detect invisible characters. Shows distribution of letters, digits, symbols, and emoji.</p>
+                    </a>
+
+                    <a href="text-diff.html" class="project-card">
+                        <div class="icon">🔀</div>
+                        <h3>Text Diff</h3>
+                        <p>Compare two texts and highlight the differences. See additions, deletions, and unchanged content at a glance.</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">✨</span>
+                    <h3>Text Transformers</h3>
+                </div>
+                <div class="project-cards">
+                    <a href="rot13.html" class="project-card">
+                        <div class="icon">🔐</div>
+                        <h3>ROT13</h3>
+                        <p>Simple letter substitution cipher. Encode or decode text by shifting each letter 13 positions in the alphabet.</p>
+                    </a>
+
+                    <a href="mirror.html" class="project-card">
+                        <div class="icon">🪞</div>
+                        <h3>Mirror Text</h3>
+                        <p>Flip your text backwards or upside down. Choose between mirror reflection or Unicode upside-down characters.</p>
+                    </a>
+
+                    <a href="zalgo.html" class="project-card">
+                        <div class="icon">👹</div>
+                        <h3>Zalgo Text</h3>
+                        <p>Create glitchy, corrupted "Zalgo" text with adjustable intensity. Goes up to 11 for maximum chaos.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo" class="oddturnip-logo">
+                <span>OddTurnip.com</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

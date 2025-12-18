@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Diff - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Page-specific styles */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .text-box textarea {
+            height: 200px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        .diff-output {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            overflow-x: auto;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .diff-output .line {
+            padding: 2px 10px;
+            margin: 0 -10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .diff-output .line-number {
+            display: inline-block;
+            width: 60px;
+            color: #666;
+            user-select: none;
+            text-align: right;
+            padding-right: 15px;
+            margin-right: 10px;
+            border-right: 1px solid #444;
+        }
+        .diff-output .unchanged {
+            color: #d4d4d4;
+        }
+        .diff-output .added {
+            background: rgba(40, 167, 69, 0.3);
+            color: #98c379;
+        }
+        .diff-output .added::before {
+            content: "+ ";
+            color: #28a745;
+        }
+        .diff-output .removed {
+            background: rgba(220, 53, 69, 0.3);
+            color: #e06c75;
+        }
+        .diff-output .removed::before {
+            content: "- ";
+            color: #dc3545;
+        }
+        .diff-output .empty {
+            color: #666;
+            font-style: italic;
+        }
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .stat-badge.added {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.4);
+        }
+        .stat-badge.removed {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.4);
+        }
+        .stat-badge.unchanged {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.4);
+        }
+        .control-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .control-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .control-row label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .control-row input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #667eea;
+        }
+        .control-row label:has(input:checked) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        @media (max-width: 768px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-row label {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                Text Diff
+            </h1>
+            <p>Compare two texts and see the differences</p>
+        </header>
+
+        <div class="content">
+            <div class="input-row">
+                <div class="text-box">
+                    <h3>Original Text</h3>
+                    <textarea id="originalText" placeholder="Paste the original text here..."></textarea>
+                </div>
+                <div class="text-box">
+                    <h3>Modified Text</h3>
+                    <textarea id="modifiedText" placeholder="Paste the modified text here..."></textarea>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <label>
+                    <input type="radio" name="diffMode" value="line" checked>
+                    <span>Compare by Lines</span>
+                </label>
+                <label>
+                    <input type="radio" name="diffMode" value="word">
+                    <span>Compare by Words</span>
+                </label>
+                <button class="btn btn-secondary" id="swapBtn">↔ Swap Texts</button>
+                <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+            </div>
+
+            <div class="stats-row" id="statsRow">
+                <span class="stat-badge added" id="addedCount">+0 added</span>
+                <span class="stat-badge removed" id="removedCount">-0 removed</span>
+                <span class="stat-badge unchanged" id="unchangedCount">0 unchanged</span>
+            </div>
+
+            <div class="diff-output" id="diffOutput">
+                <div class="line empty">Enter text in both boxes to see the diff...</div>
+            </div>
+
+            <div class="info-box">
+                <h4>About This Tool</h4>
+                <p>This tool compares two pieces of text and highlights the differences. <strong>Green lines (+)</strong> show text that was added in the modified version. <strong>Red lines (-)</strong> show text that was removed from the original. Use "Compare by Lines" for code or structured text, and "Compare by Words" for prose or paragraphs.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const originalText = document.getElementById('originalText');
+        const modifiedText = document.getElementById('modifiedText');
+        const diffOutput = document.getElementById('diffOutput');
+        const swapBtn = document.getElementById('swapBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const addedCount = document.getElementById('addedCount');
+        const removedCount = document.getElementById('removedCount');
+        const unchangedCount = document.getElementById('unchangedCount');
+
+        function getDiffMode() {
+            return document.querySelector('input[name="diffMode"]:checked').value;
+        }
+
+        // Longest Common Subsequence for diff
+        function lcs(a, b) {
+            const m = a.length;
+            const n = b.length;
+            const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (a[i - 1] === b[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            // Backtrack to find the diff
+            const diff = [];
+            let i = m, j = n;
+
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+                    diff.unshift({ type: 'unchanged', value: a[i - 1] });
+                    i--;
+                    j--;
+                } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                    diff.unshift({ type: 'added', value: b[j - 1] });
+                    j--;
+                } else {
+                    diff.unshift({ type: 'removed', value: a[i - 1] });
+                    i--;
+                }
+            }
+
+            return diff;
+        }
+
+        function computeDiff() {
+            const original = originalText.value;
+            const modified = modifiedText.value;
+
+            if (!original && !modified) {
+                diffOutput.innerHTML = '<div class="line empty">Enter text in both boxes to see the diff...</div>';
+                updateStats(0, 0, 0);
+                return;
+            }
+
+            const mode = getDiffMode();
+            let originalParts, modifiedParts;
+
+            if (mode === 'line') {
+                originalParts = original.split('\n');
+                modifiedParts = modified.split('\n');
+            } else {
+                // Word mode - split by whitespace but preserve whitespace info
+                originalParts = original.split(/(\s+)/).filter(s => s.length > 0);
+                modifiedParts = modified.split(/(\s+)/).filter(s => s.length > 0);
+            }
+
+            const diff = lcs(originalParts, modifiedParts);
+
+            let added = 0, removed = 0, unchanged = 0;
+            let html = '';
+            let lineNum = { original: 1, modified: 1 };
+
+            if (mode === 'line') {
+                diff.forEach(item => {
+                    const escapedValue = escapeHtml(item.value);
+                    const displayValue = escapedValue || '&nbsp;'; // Show empty lines
+
+                    if (item.type === 'unchanged') {
+                        html += `<div class="line unchanged"><span class="line-number">${lineNum.original}:${lineNum.modified}</span>${displayValue}</div>`;
+                        lineNum.original++;
+                        lineNum.modified++;
+                        unchanged++;
+                    } else if (item.type === 'added') {
+                        html += `<div class="line added"><span class="line-number">+${lineNum.modified}</span>${displayValue}</div>`;
+                        lineNum.modified++;
+                        added++;
+                    } else {
+                        html += `<div class="line removed"><span class="line-number">-${lineNum.original}</span>${displayValue}</div>`;
+                        lineNum.original++;
+                        removed++;
+                    }
+                });
+            } else {
+                // Word mode - render inline
+                let currentLine = '<div class="line">';
+                diff.forEach(item => {
+                    const escapedValue = escapeHtml(item.value);
+
+                    if (item.type === 'unchanged') {
+                        currentLine += `<span class="unchanged">${escapedValue}</span>`;
+                        if (!/^\s+$/.test(item.value)) unchanged++;
+                    } else if (item.type === 'added') {
+                        currentLine += `<span style="background: rgba(40, 167, 69, 0.4); color: #98c379; padding: 1px 3px; border-radius: 3px;">${escapedValue}</span>`;
+                        if (!/^\s+$/.test(item.value)) added++;
+                    } else {
+                        currentLine += `<span style="background: rgba(220, 53, 69, 0.4); color: #e06c75; padding: 1px 3px; border-radius: 3px; text-decoration: line-through;">${escapedValue}</span>`;
+                        if (!/^\s+$/.test(item.value)) removed++;
+                    }
+                });
+                currentLine += '</div>';
+                html = currentLine;
+            }
+
+            if (!html.trim()) {
+                html = '<div class="line empty">No differences found - texts are identical!</div>';
+            }
+
+            diffOutput.innerHTML = html;
+            updateStats(added, removed, unchanged);
+        }
+
+        function updateStats(added, removed, unchanged) {
+            addedCount.textContent = `+${added} added`;
+            removedCount.textContent = `-${removed} removed`;
+            unchangedCount.textContent = `${unchanged} unchanged`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        originalText.addEventListener('input', computeDiff);
+        modifiedText.addEventListener('input', computeDiff);
+
+        document.querySelectorAll('input[name="diffMode"]').forEach(radio => {
+            radio.addEventListener('change', computeDiff);
+        });
+
+        swapBtn.addEventListener('click', () => {
+            const temp = originalText.value;
+            originalText.value = modifiedText.value;
+            modifiedText.value = temp;
+            computeDiff();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            originalText.value = '';
+            modifiedText.value = '';
+            computeDiff();
+            originalText.focus();
+        });
+    </script>
+</body>
+</html>

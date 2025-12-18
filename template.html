@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAGE_TITLE - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ========================================
+           PAGE-SPECIFIC STYLES
+           Add any styles unique to this page here
+           ======================================== */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                PAGE_TITLE
+            </h1>
+            <p>PAGE_SUBTITLE</p>
+        </header>
+
+        <div class="content">
+            <!-- ADD YOUR CONTENT HERE -->
+
+            <div class="info-box">
+                <h4>About This Tool</h4>
+                <p>Description of what this tool does.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================================
+           PAGE-SPECIFIC JAVASCRIPT
+           ======================================== */
+
+        // Common utility: Show status message
+        function showStatus(element, message, type = 'success') {
+            element.textContent = message;
+            element.className = 'status ' + type;
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.className = 'status';
+                }, 2000);
+            }
+        }
+
+        // Common utility: Copy to clipboard
+        async function copyToClipboard(text, statusElement) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showStatus(statusElement, 'Copied to clipboard!');
+            } catch (err) {
+                showStatus(statusElement, 'Failed to copy', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

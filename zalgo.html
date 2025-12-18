@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zalgo Text - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Page-specific styles */
+        .text-box textarea {
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                Zalgo Text
+            </h1>
+            <p>He comes... create glitchy, corrupted text</p>
+        </header>
+
+        <div class="content">
+            <div class="control-group">
+                <h4>Intensity</h4>
+                <div class="slider-container">
+                    <label>Chaos Level:</label>
+                    <input type="range" id="intensitySlider" min="1" max="11" value="5">
+                    <span class="slider-value" id="intensityValue">5</span>
+                </div>
+            </div>
+
+            <div class="text-section">
+                <div class="text-box">
+                    <h3>Input Text</h3>
+                    <textarea id="inputText" placeholder="Enter text to zalgo-ify..."></textarea>
+                </div>
+                <div class="text-box">
+                    <h3>Zalgo Output</h3>
+                    <textarea id="outputText" readonly placeholder="Z̴a̷l̸g̵o̶ ̷t̴e̸x̴t̷ ̶w̵i̴l̸l̴ ̵a̸p̴p̴e̷a̷r̸ ̴h̵e̴r̶e̸.̵.̸.̶"></textarea>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="copyBtn">Copy Output</button>
+                        <button class="btn btn-secondary" id="clearBtn">Clear</button>
+                    </div>
+                    <div class="status" id="status"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>About Zalgo Text</h4>
+                <p>Zalgo text is created by adding Unicode combining characters (diacritical marks) above, below, and through regular text. Named after a creepypasta meme, it creates a "corrupted" or "glitchy" appearance. Use the slider to control how chaotic the effect is - low values add subtle distortion, high values create maximum chaos. Why does the slider go to 11? Because it's one more chaotic, isn't it?</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const intensitySlider = document.getElementById('intensitySlider');
+        const intensityValue = document.getElementById('intensityValue');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+
+        // Zalgo combining characters
+        const zalgoUp = [
+            '\u030d', '\u030e', '\u0304', '\u0305', '\u033f', '\u0311', '\u0306',
+            '\u0310', '\u0352', '\u0357', '\u0351', '\u0307', '\u0308', '\u030a',
+            '\u0342', '\u0343', '\u0344', '\u034a', '\u034b', '\u034c', '\u0303',
+            '\u0302', '\u030c', '\u0350', '\u0300', '\u0301', '\u030b', '\u030f',
+            '\u0312', '\u0313', '\u0314', '\u033d', '\u0309', '\u0363', '\u0364',
+            '\u0365', '\u0366', '\u0367', '\u0368', '\u0369', '\u036a', '\u036b',
+            '\u036c', '\u036d', '\u036e', '\u036f', '\u033e', '\u035b'
+        ];
+
+        const zalgoDown = [
+            '\u0316', '\u0317', '\u0318', '\u0319', '\u031c', '\u031d', '\u031e',
+            '\u031f', '\u0320', '\u0324', '\u0325', '\u0326', '\u0329', '\u032a',
+            '\u032b', '\u032c', '\u032d', '\u032e', '\u032f', '\u0330', '\u0331',
+            '\u0332', '\u0333', '\u0339', '\u033a', '\u033b', '\u033c', '\u0345',
+            '\u0347', '\u0348', '\u0349', '\u034d', '\u034e', '\u0353', '\u0354',
+            '\u0355', '\u0356', '\u0359', '\u035a', '\u0323'
+        ];
+
+        const zalgoMiddle = [
+            '\u0315', '\u031b', '\u0340', '\u0341', '\u0358', '\u0321', '\u0322',
+            '\u0327', '\u0328', '\u0334', '\u0335', '\u0336', '\u034f', '\u035c',
+            '\u035d', '\u035e', '\u035f', '\u0360', '\u0362', '\u0338', '\u0337'
+        ];
+
+        function randomFrom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function zalgoify(text, intensity) {
+            let result = '';
+            for (let char of text) {
+                result += char;
+
+                // Skip adding zalgo to whitespace
+                if (/\s/.test(char)) continue;
+
+                // Add combining characters based on intensity
+                const count = Math.floor(Math.random() * intensity) + 1;
+
+                for (let i = 0; i < count; i++) {
+                    if (Math.random() > 0.3) result += randomFrom(zalgoUp);
+                    if (Math.random() > 0.3) result += randomFrom(zalgoDown);
+                    if (Math.random() > 0.5) result += randomFrom(zalgoMiddle);
+                }
+            }
+            return result;
+        }
+
+        function updateOutput() {
+            const intensity = parseInt(intensitySlider.value);
+            outputText.value = zalgoify(inputText.value, intensity);
+        }
+
+        inputText.addEventListener('input', updateOutput);
+
+        intensitySlider.addEventListener('input', function() {
+            intensityValue.textContent = this.value;
+            updateOutput();
+        });
+
+        copyBtn.addEventListener('click', async function() {
+            if (outputText.value) {
+                try {
+                    await navigator.clipboard.writeText(outputText.value);
+                    showStatus('Copied to clipboard!');
+                } catch (err) {
+                    outputText.select();
+                    document.execCommand('copy');
+                    showStatus('Copied to clipboard!');
+                }
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            outputText.value = '';
+            inputText.focus();
+        });
+
+        function showStatus(message) {
+            status.textContent = message;
+            status.className = 'status success';
+            setTimeout(() => {
+                status.className = 'status';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

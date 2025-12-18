@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirror Text - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                Mirror Text
+            </h1>
+            <p>Flip your text backwards or upside down</p>
+        </header>
+
+        <div class="content">
+            <div class="control-group">
+                <h4>Mode</h4>
+                <div class="radio-row">
+                    <label>
+                        <input type="radio" name="mode" value="reverse" checked>
+                        <span>Mirror Text</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="upside">
+                        <span>Upside Down Text</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="text-section">
+                <div class="text-box">
+                    <h3>Input Text</h3>
+                    <textarea id="inputText" placeholder="Enter text to mirror..."></textarea>
+                </div>
+                <div class="text-box">
+                    <h3>Output</h3>
+                    <textarea id="outputText" readonly placeholder="Transformed text will appear here..."></textarea>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="copyBtn">Copy Output</button>
+                        <button class="btn btn-secondary" id="clearBtn">Clear</button>
+                    </div>
+                    <div class="status" id="status"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>About This Tool</h4>
+                <p><strong>Mirror Text:</strong> Flips each character horizontally and reverses the order, creating a true mirror reflection (ƚxɘT ɿoɿɿiM).<br>
+                <strong>Upside Down Text:</strong> Converts characters to their upside-down Unicode equivalents and reverses the order, so the text appears flipped vertically. Not all characters have perfect equivalents, so some may remain unchanged.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+
+        // Mirror character map (horizontal flip)
+        const mirrorMap = {
+            'a': 'ɒ', 'b': 'd', 'c': 'ɔ', 'd': 'b', 'e': 'ɘ',
+            'f': 'ʇ', 'g': 'ǫ', 'h': 'ʜ', 'i': 'i', 'j': 'ꞁ',
+            'k': 'ʞ', 'l': 'l', 'm': 'm', 'n': 'ᴎ', 'o': 'o',
+            'p': 'q', 'q': 'p', 'r': 'ɿ', 's': 'ꙅ', 't': 'ƚ',
+            'u': 'u', 'v': 'v', 'w': 'w', 'x': 'x', 'y': 'ʏ',
+            'z': 'ƹ',
+            'A': 'A', 'B': 'ᙠ', 'C': 'Ɔ', 'D': 'ᗡ', 'E': 'Ǝ',
+            'F': 'ꟻ', 'G': 'Ꭾ', 'H': 'H', 'I': 'I', 'J': 'Ⴑ',
+            'K': 'ꓘ', 'L': '⅃', 'M': 'M', 'N': 'ᴎ', 'O': 'O',
+            'P': 'ꟼ', 'Q': 'Ọ', 'R': 'ᴙ', 'S': 'Ꙅ', 'T': 'T',
+            'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y',
+            'Z': 'Ƹ',
+            '0': '0', '1': '1', '2': 'S', '3': 'Ɛ', '4': '߂',
+            '5': '2', '6': '6', '7': '٢', '8': '8', '9': '9',
+            '(': ')', ')': '(', '[': ']', ']': '[',
+            '{': '}', '}': '{', '<': '>', '>': '<',
+            '/': '\\', '\\': '/', '?': '⸮', '!': '!',
+            ';': ';', ':': ':'
+        };
+
+        // Upside-down character map
+        const upsideDownMap = {
+            'a': '\u0250', 'b': 'q', 'c': '\u0254', 'd': 'p', 'e': '\u01DD',
+            'f': '\u025F', 'g': '\u0183', 'h': '\u0265', 'i': '\u0131', 'j': '\u027E',
+            'k': '\u029E', 'l': 'l', 'm': '\u026F', 'n': 'u', 'o': 'o',
+            'p': 'd', 'q': 'b', 'r': '\u0279', 's': 's', 't': '\u0287',
+            'u': 'n', 'v': '\u028C', 'w': '\u028D', 'x': 'x', 'y': '\u028E',
+            'z': 'z',
+            'A': '\u2200', 'B': 'B', 'C': '\u0186', 'D': 'D', 'E': '\u018E',
+            'F': '\u2132', 'G': '\u2141', 'H': 'H', 'I': 'I', 'J': '\u017F',
+            'K': 'K', 'L': '\u02E5', 'M': 'W', 'N': 'N', 'O': 'O',
+            'P': '\u0500', 'Q': 'Q', 'R': 'R', 'S': 'S', 'T': '\u22A5',
+            'U': '\u2229', 'V': '\u039B', 'W': 'M', 'X': 'X', 'Y': '\u2144',
+            'Z': 'Z',
+            '0': '0', '1': '\u0196', '2': '\u1105', '3': '\u0190', '4': '\u3123',
+            '5': '\u03DB', '6': '9', '7': '\u3125', '8': '8', '9': '6',
+            '.': '\u02D9', ',': "'", "'": ',', '"': '\u201E', '!': '\u00A1',
+            '?': '\u00BF', '(': ')', ')': '(', '[': ']', ']': '[',
+            '{': '}', '}': '{', '<': '>', '>': '<', '&': '\u214B',
+            '_': '\u203E', ';': '\u061B', '/': '\\', '\\': '/'
+        };
+
+        function getMode() {
+            return document.querySelector('input[name="mode"]:checked').value;
+        }
+
+        function mirrorText(text) {
+            return [...text]
+                .map(char => mirrorMap[char] || char)
+                .reverse()
+                .join('');
+        }
+
+        function upsideDownText(text) {
+            return [...text]
+                .map(char => upsideDownMap[char] || char)
+                .reverse()
+                .join('');
+        }
+
+        function updateOutput() {
+            const mode = getMode();
+            if (mode === 'reverse') {
+                outputText.value = mirrorText(inputText.value);
+            } else {
+                outputText.value = upsideDownText(inputText.value);
+            }
+        }
+
+        inputText.addEventListener('input', updateOutput);
+
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener('change', updateOutput);
+        });
+
+        copyBtn.addEventListener('click', async function() {
+            if (outputText.value) {
+                try {
+                    await navigator.clipboard.writeText(outputText.value);
+                    showStatus('Copied to clipboard!');
+                } catch (err) {
+                    outputText.select();
+                    document.execCommand('copy');
+                    showStatus('Copied to clipboard!');
+                }
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            outputText.value = '';
+            inputText.focus();
+        });
+
+        function showStatus(message) {
+            status.textContent = message;
+            status.className = 'status success';
+            setTimeout(() => {
+                status.className = 'status';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

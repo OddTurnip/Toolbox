@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROT13 - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Page-specific styles */
+        .text-box textarea {
+            height: 250px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                ROT13
+            </h1>
+            <p>Simple letter substitution cipher</p>
+        </header>
+
+        <div class="content">
+            <div class="text-section">
+                <div class="text-box">
+                    <h3>Input Text</h3>
+                    <textarea id="inputText" placeholder="Enter text to encode/decode..."></textarea>
+                </div>
+                <div class="text-box">
+                    <h3>ROT13 Output</h3>
+                    <textarea id="outputText" readonly placeholder="ROT13 result will appear here..."></textarea>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="copyBtn">Copy Output</button>
+                        <button class="btn btn-secondary" id="clearBtn">Clear</button>
+                    </div>
+                    <div class="status" id="status"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>About ROT13</h4>
+                <p>ROT13 is a simple letter substitution cipher that replaces each letter with the letter 13 positions after it in the alphabet. Since the alphabet has 26 letters, applying ROT13 twice returns the original text. It only affects letters A-Z and a-z; numbers and special characters remain unchanged.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+
+        function rot13(str) {
+            return str.replace(/[a-zA-Z]/g, function(char) {
+                const code = char.charCodeAt(0);
+                const base = code >= 97 ? 97 : 65; // lowercase or uppercase
+                return String.fromCharCode(((code - base + 13) % 26) + base);
+            });
+        }
+
+        inputText.addEventListener('input', function() {
+            outputText.value = rot13(inputText.value);
+        });
+
+        copyBtn.addEventListener('click', async function() {
+            if (outputText.value) {
+                try {
+                    await navigator.clipboard.writeText(outputText.value);
+                    showStatus('Copied to clipboard!');
+                } catch (err) {
+                    // Fallback for older browsers
+                    outputText.select();
+                    document.execCommand('copy');
+                    showStatus('Copied to clipboard!');
+                }
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            outputText.value = '';
+            inputText.focus();
+        });
+
+        function showStatus(message) {
+            status.textContent = message;
+            status.className = 'status success';
+            setTimeout(() => {
+                status.className = 'status';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
