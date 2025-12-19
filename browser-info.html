@@ -203,6 +203,21 @@
             border-radius: 4px;
         }
 
+        .reveal-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .reveal-btn:hover {
+            background: #5a6fd6;
+        }
+
         .badge {
             display: inline-block;
             padding: 3px 8px;
@@ -366,7 +381,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Public IP</span>
-                        <span class="info-value" id="publicIP"><span class="loading">fetching...</span></span>
+                        <span class="info-value" id="publicIP"><button class="reveal-btn" onclick="fetchPublicIP()">Reveal</button></span>
                     </div>
                 </div>
 
@@ -676,8 +691,6 @@
                 setInfoValue('downlink', null);
             }
 
-            fetchPublicIP();
-
             // Features
             const webgl = checkWebGL();
             document.getElementById('webglSupport').textContent =
@@ -847,23 +860,64 @@
             return detected;
         }
 
-        // Ad blocker detection
+        // Ad blocker detection - multiple methods
         function detectAdBlocker() {
-            return new Promise((resolve) => {
-                // Create a bait element
+            return new Promise(async (resolve) => {
+                let detected = false;
+
+                // Method 1: Bait element with ad-related classes/IDs
                 const bait = document.createElement('div');
-                bait.className = 'ad ads adsbox ad-placement doubleclick';
-                bait.style.cssText = 'position:absolute;top:-10px;left:-10px;width:1px;height:1px;';
+                bait.id = 'ad-banner';
+                bait.className = 'ad ads adsbox ad-placement doubleclick pub_300x250 pub_300x250m pub_728x90 text-ad textAd text_ad text_ads text-ads';
+                bait.style.cssText = 'position:absolute;top:-10px;left:-10px;width:1px;height:1px;background:transparent;';
                 bait.innerHTML = '&nbsp;';
                 document.body.appendChild(bait);
 
-                setTimeout(() => {
-                    const blocked = bait.offsetHeight === 0 ||
-                                   bait.offsetParent === null ||
-                                   window.getComputedStyle(bait).display === 'none';
-                    bait.remove();
-                    resolve(blocked);
-                }, 100);
+                // Method 2: Create a script element pointing to a fake ad script
+                const baitScript = document.createElement('script');
+                baitScript.src = '/ads/ads.js';
+                baitScript.async = true;
+
+                // Method 3: Create an image pointing to a typical ad path
+                const baitImg = document.createElement('img');
+                baitImg.src = '/ad-banner.gif';
+                baitImg.style.cssText = 'position:absolute;top:-10px;left:-10px;width:1px;height:1px;';
+
+                document.body.appendChild(baitImg);
+
+                // Wait for elements to be processed
+                await new Promise(r => setTimeout(r, 150));
+
+                // Check if bait div was hidden
+                if (bait.offsetHeight === 0 ||
+                    bait.offsetParent === null ||
+                    window.getComputedStyle(bait).display === 'none' ||
+                    window.getComputedStyle(bait).visibility === 'hidden') {
+                    detected = true;
+                }
+
+                // Method 4: Try to fetch from a path that looks like an ad
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 500);
+                    await fetch('/pagead/ads?client=test', {
+                        method: 'HEAD',
+                        mode: 'no-cors',
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                } catch (e) {
+                    // If blocked by extension (not just 404), error name is often different
+                    if (e.name === 'TypeError' && e.message.includes('blocked')) {
+                        detected = true;
+                    }
+                }
+
+                // Cleanup
+                bait.remove();
+                baitImg.remove();
+
+                resolve(detected);
             });
         }
 
