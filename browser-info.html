@@ -379,8 +379,7 @@
                 <h4>About This Tool</h4>
                 <p>This page shows information that any website you visit can see about your browser and device.
                    This is useful for troubleshooting, sharing your setup with support, or simply understanding your digital footprint.
-                   The viewport size updates live as you resize your window. Some information (like MAC address) is intentionally
-                   not accessible to websites for security reasons.</p>
+                   The viewport size updates live as you resize your window.</p>
             </div>
         </div>
 
@@ -561,8 +560,7 @@
                 navigator.platform || 'Unknown';
             document.getElementById('cpuCores').textContent =
                 navigator.hardwareConcurrency || 'Unknown';
-            document.getElementById('deviceMemory').textContent =
-                navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Not available';
+            setInfoValue('deviceMemory', navigator.deviceMemory ? `${navigator.deviceMemory} GB` : null);
             document.getElementById('touchSupport').textContent =
                 ('ontouchstart' in window || navigator.maxTouchPoints > 0)
                     ? `Yes (${navigator.maxTouchPoints || 1} points)` : 'No';
@@ -591,16 +589,14 @@
 
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
             if (connection) {
-                document.getElementById('connectionType').textContent =
-                    connection.type || 'Unknown';
-                document.getElementById('effectiveType').textContent =
-                    connection.effectiveType?.toUpperCase() || 'Unknown';
-                document.getElementById('downlink').textContent =
-                    connection.downlink ? `${connection.downlink} Mbps` : 'Unknown';
+                setInfoValue('connectionType', connection.type);
+                setInfoValue('effectiveType', connection.effectiveType?.toUpperCase());
+                setInfoValue('downlink', connection.downlink ? `${connection.downlink} Mbps` : null);
             } else {
-                document.getElementById('connectionType').textContent = 'Not available';
-                document.getElementById('effectiveType').textContent = 'Not available';
-                document.getElementById('downlink').textContent = 'Not available';
+                // Hide all connection rows if API not available
+                setInfoValue('connectionType', null);
+                setInfoValue('effectiveType', null);
+                setInfoValue('downlink', null);
             }
 
             fetchPublicIP();
@@ -696,6 +692,19 @@ NETWORK
 USER AGENT
 ${navigator.userAgent}
 `;
+        }
+
+        // Utility function: set value or hide row if unavailable
+        function setInfoValue(id, value, className = '') {
+            const el = document.getElementById(id);
+            if (!value || value === 'Unknown' || value === 'Not available') {
+                // Hide the entire row
+                el.closest('.info-row').style.display = 'none';
+                return false;
+            }
+            el.textContent = value;
+            if (className) el.className = 'info-value ' + className;
+            return true;
         }
 
         // Utility function
