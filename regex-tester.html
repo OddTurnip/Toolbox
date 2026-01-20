@@ -69,18 +69,23 @@
             color: #666;
             font-size: 0.9em;
         }
+        .test-string {
+            flex: 1;
+            min-width: 280px;
+        }
         .test-string textarea {
             height: 150px;
             font-family: 'Consolas', 'Monaco', monospace;
         }
         .results-section {
-            margin-top: 20px;
+            flex: 1;
+            min-width: 280px;
         }
-        .results-header {
+        .results-section h3 {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         .match-count {
             font-size: 0.95em;
@@ -280,10 +285,7 @@ https://www.example.org/path?query=value</textarea>
                 </div>
 
                 <div class="results-section">
-                    <div class="results-header">
-                        <h3>Results</h3>
-                        <span class="match-count" id="matchCount"></span>
-                    </div>
+                    <h3>Results <span class="match-count" id="matchCount"></span></h3>
                     <div class="tab-buttons">
                         <button class="tab-btn active" data-tab="highlighted">Highlighted</button>
                         <button class="tab-btn" data-tab="matches">Match List</button>
