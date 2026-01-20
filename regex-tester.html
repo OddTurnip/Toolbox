@@ -73,6 +73,13 @@
             flex: 1;
             min-width: 280px;
         }
+		.test-string h3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+			height:25px;
+        }
         .test-string textarea {
             height: 150px;
             font-family: 'Consolas', 'Monaco', monospace;
@@ -86,6 +93,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+			height:25px;
         }
         .match-count {
             font-size: 0.95em;
@@ -206,10 +214,21 @@
             font-size: 0.9em;
             line-height: 1.4;
         }
+		
+		.escaped-characters {
+			background: rgba(64,0,64,0.2);
+			padding: 0 10px 5px 10px;
+			border: 1px solid #848;
+		}
+		.escaped-characters code {
+			font-weight: 600;
+			color: #e74c3c;
+		}
         .tab-buttons {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+			height: 40px;
         }
         .tab-btn {
             padding: 8px 16px;
@@ -279,9 +298,15 @@
             <div class="text-section">
                 <div class="text-box test-string">
                     <h3>Test String</h3>
-                    <textarea id="testString" placeholder="Enter text to test against the regex...">The quick brown fox jumps over 13 lazy dogs at 3:45 PM.
+					<div class="tab-buttons">
+					</div>
+					<div id="inputTab" class="tab-content">
+						<textarea id="testString" placeholder="Enter text to test against the regex...">
+The quick brown fox jumps over 13 lazy dogs at 3:45 PM.
 Email: test@example.com, phone: 555-123-4567
-https://www.example.org/path?query=value</textarea>
+https://www.example.org/path?query=value
+						</textarea>
+					</div>
                 </div>
 
                 <div class="results-section">
@@ -355,6 +380,7 @@ https://www.example.org/path?query=value</textarea>
                     <div class="cheat-category">
                         <h4>Common Patterns</h4>
                         <div class="cheat-item"><code>\d+</code><span>One or more digits</span></div>
+						<div class="cheat-item"><code>\b\w+\b</code><span>Highlight words</span></div>
                         <div class="cheat-item"><code>\w+@\w+\.\w+</code><span>Simple email</span></div>
                         <div class="cheat-item"><code>https?://\S+</code><span>URL</span></div>
                         <div class="cheat-item"><code>\d{3}-\d{4}</code><span>Phone (xxx-xxxx)</span></div>
@@ -365,7 +391,8 @@ https://www.example.org/path?query=value</textarea>
 
             <div class="info-box">
                 <h4>About Regex Tester</h4>
-                <p>Test your regular expressions against sample text in real-time. Matches are highlighted as you type. This tool uses JavaScript's RegExp engine. Remember to escape special characters like <code>.</code>, <code>*</code>, <code>+</code>, <code>?</code>, <code>(</code>, <code>)</code>, <code>[</code>, <code>]</code>, <code>{</code>, <code>}</code>, <code>\</code>, <code>^</code>, <code>$</code>, <code>|</code> with a backslash when you want to match them literally.</p>
+                <p>This tool uses JavaScript's RegExp engine. 
+				<br />Remember to escape special characters like <span class="escaped-characters"><code>.</code> <code>*</code> <code>+</code> <code>?</code> <code>(</code> <code>)</code> <code>[</code> <code>]</code> <code>{</code> <code>}</code> <code>\</code> <code>^</code> <code>$</code> <code>|</code></span> with a backslash when you want to match them literally.</p>
             </div>
         </div>
 
