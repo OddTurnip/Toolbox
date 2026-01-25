@@ -8,16 +8,22 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Page-specific styles */
-        .control-group {
-            background: none;
-            padding: 0;
-            margin-bottom: 12px;
+        .form-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px 15px;
+            align-items: start;
+            margin-top: 12px;
         }
-        .control-group h4 {
-            margin-bottom: 8px;
-            padding-bottom: 0;
-            border-bottom: none;
+        .form-grid .form-label {
+            font-weight: 600;
+            color: #333;
+            padding-top: 6px;
         }
+        .form-grid .form-control {
+            min-width: 0;
+        }
+
         .output-box {
             background: #1a202c;
             border-radius: 8px;
@@ -48,48 +54,42 @@
         .length-control {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .length-control label {
-            color: #333;
-            font-weight: 600;
+            gap: 10px;
         }
         .length-control input[type="range"] {
             flex: 1;
-            min-width: 200px;
-            height: 8px;
+            min-width: 100px;
+            height: 6px;
             -webkit-appearance: none;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px;
+            border-radius: 3px;
             outline: none;
         }
         .length-control input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             background: white;
             border: 2px solid #667eea;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .length-control input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             background: white;
             border: 2px solid #667eea;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .length-control input[type="number"] {
-            width: 80px;
-            padding: 8px 12px;
+            width: 65px;
+            padding: 5px 8px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
+            border-radius: 6px;
+            font-size: 0.9em;
             text-align: center;
             font-weight: 600;
         }
@@ -100,20 +100,20 @@
 
         .charset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 8px;
-            margin-bottom: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px;
         }
         .charset-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            gap: 6px;
+            padding: 5px 8px;
             background: white;
             border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.9em;
         }
         .charset-item:hover {
             border-color: #667eea;
@@ -124,8 +124,8 @@
             background: #f0f4ff;
         }
         .charset-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             cursor: pointer;
             accent-color: #667eea;
         }
@@ -136,51 +136,39 @@
         }
         .charset-item .charset-preview {
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #666;
-            background: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 4px;
         }
 
-        .custom-chars {
-            margin-top: 8px;
-        }
-        .custom-chars label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        .custom-chars input {
+        .text-input {
             width: 100%;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 1em;
+            border-radius: 5px;
+            font-size: 0.9em;
             font-family: 'Consolas', 'Monaco', monospace;
         }
-        .custom-chars input:focus {
+        .text-input:focus {
             outline: none;
             border-color: #667eea;
         }
-        .custom-chars .hint {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
+        .hint {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 3px;
         }
 
         .presets {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         .preset-btn {
-            padding: 6px 12px;
+            padding: 4px 10px;
             background: #f0f4ff;
-            border: 2px solid #e0e0e0;
-            border-radius: 16px;
-            font-size: 0.85em;
+            border: 1px solid #d0d0d0;
+            border-radius: 12px;
+            font-size: 0.8em;
             cursor: pointer;
             transition: all 0.2s;
             color: #333;
@@ -198,18 +186,18 @@
         }
 
         .strength-meter {
-            margin-top: 10px;
-            padding: 12px;
+            margin-top: 12px;
+            padding: 10px;
             background: #f8f9ff;
             border-radius: 6px;
         }
         .strength-meter .strength-label {
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .strength-bar {
-            height: 6px;
+            height: 5px;
             background: #e0e0e0;
             border-radius: 3px;
             overflow: hidden;
@@ -220,8 +208,8 @@
             transition: all 0.3s;
         }
         .strength-text {
-            margin-top: 5px;
-            font-size: 0.85em;
+            margin-top: 4px;
+            font-size: 0.8em;
             font-weight: 600;
         }
         .strength-weak { background: #e53e3e; }
@@ -233,21 +221,16 @@
         .entropy-info {
             display: flex;
             gap: 15px;
-            margin-top: 6px;
-            font-size: 0.8em;
+            margin-top: 4px;
+            font-size: 0.75em;
             color: #666;
         }
-        .entropy-info span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
         .info-box {
-            padding: 15px;
-            margin-top: 15px;
+            padding: 12px;
+            margin-top: 12px;
         }
         .info-box h4 {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
     </style>
 </head>
@@ -276,44 +259,44 @@
 
             <div id="status" class="status"></div>
 
-            <!-- Length Control -->
-            <div class="length-control" style="margin-top: 12px;">
-                <label>Length:</label>
-                <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
-                <input type="number" id="lengthInput" min="1" max="512" value="20" oninput="syncLengthFromInput(this.value)">
-            </div>
+            <div class="form-grid">
+                <div class="form-label">Length:</div>
+                <div class="form-control length-control">
+                    <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
+                    <input type="number" id="lengthInput" min="1" max="512" value="20" oninput="syncLengthFromInput(this.value)">
+                </div>
 
-            <!-- Quick Presets -->
-            <div class="control-group">
-                <h4>Quick Presets</h4>
-                <div class="presets">
+                <div class="form-label">Presets:</div>
+                <div class="form-control presets">
                     <button class="preset-btn" onclick="applyPreset('password')">Password (16)</button>
-                    <button class="preset-btn" onclick="applyPreset('strong')">Strong Password (24)</button>
+                    <button class="preset-btn" onclick="applyPreset('strong')">Strong (24)</button>
                     <button class="preset-btn" onclick="applyPreset('pin')">PIN (6)</button>
-                    <button class="preset-btn" onclick="applyPreset('hex')">Hex Token (32)</button>
+                    <button class="preset-btn" onclick="applyPreset('hex')">Hex (32)</button>
                     <button class="preset-btn" onclick="applyPreset('api')">API Key (40)</button>
                     <button class="preset-btn" onclick="applyPreset('uuid')">UUID v4</button>
                 </div>
-            </div>
 
-            <!-- Character Sets -->
-            <div class="control-group">
-                <h4>Character Sets</h4>
-                <div class="charset-grid">
+                <div class="form-label">Characters:</div>
+                <div class="form-control charset-grid">
                     <label class="charset-item checked">
                         <input type="checkbox" id="uppercase" checked onchange="updateCharsetUI(this)">
-                        <span class="charset-label">Uppercase</span>
+                        <span class="charset-label">Upper</span>
                         <span class="charset-preview">A-Z</span>
                     </label>
                     <label class="charset-item checked">
                         <input type="checkbox" id="lowercase" checked onchange="updateCharsetUI(this)">
-                        <span class="charset-label">Lowercase</span>
+                        <span class="charset-label">Lower</span>
                         <span class="charset-preview">a-z</span>
                     </label>
                     <label class="charset-item checked">
                         <input type="checkbox" id="digits" checked onchange="updateCharsetUI(this)">
                         <span class="charset-label">Digits</span>
                         <span class="charset-preview">0-9</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="special" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Special</span>
+                        <span class="charset-preview">!@#$</span>
                     </label>
                     <label class="charset-item">
                         <input type="checkbox" id="minus" onchange="updateCharsetUI(this)">
@@ -326,31 +309,24 @@
                         <span class="charset-preview">_</span>
                     </label>
                     <label class="charset-item">
-                        <input type="checkbox" id="space" onchange="updateCharsetUI(this)">
-                        <span class="charset-label">Space</span>
-                        <span class="charset-preview">&nbsp; &nbsp;</span>
-                    </label>
-                    <label class="charset-item">
-                        <input type="checkbox" id="special" onchange="updateCharsetUI(this)">
-                        <span class="charset-label">Special</span>
-                        <span class="charset-preview">!@#$%^&*</span>
-                    </label>
-                    <label class="charset-item">
                         <input type="checkbox" id="brackets" onchange="updateCharsetUI(this)">
                         <span class="charset-label">Brackets</span>
-                        <span class="charset-preview">[]{}()&lt;&gt;</span>
+                        <span class="charset-preview">[]{}()</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="space" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Space</span>
                     </label>
                 </div>
 
-                <div class="custom-chars">
-                    <label for="customChars">Additional Characters:</label>
-                    <input type="text" id="customChars" placeholder="Add any extra characters to include...">
+                <div class="form-label">Custom:</div>
+                <div class="form-control">
+                    <input type="text" id="customChars" class="text-input" placeholder="Extra characters to include...">
                 </div>
 
-                <div class="custom-chars">
-                    <label for="pattern">Pattern (optional):</label>
-                    <input type="text" id="pattern" placeholder="e.g. xxxx-xxxx-xxxx or xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx">
-                    <div class="hint">Use 'x' for random characters from pool, other characters are literal</div>
+                <div class="form-label">Pattern:</div>
+                <div class="form-control">
+                    <input type="text" id="pattern" class="text-input" placeholder="e.g. xxxx-xxxx-xxxx (x = random char)">
                 </div>
             </div>
 
