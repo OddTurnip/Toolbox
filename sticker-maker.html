@@ -494,7 +494,7 @@
         }
 
         // Find bounding box of non-transparent pixels
-        function findOpaqueBoundingBox(imageData) {
+        function findOpaqueBoundingBox(imageData, alphaThreshold = 10) {
             const w = imageData.width;
             const h = imageData.height;
             const data = imageData.data;
@@ -506,7 +506,8 @@
                 for (let x = 0; x < w; x++) {
                     const idx = (y * w + x) * 4;
                     const alpha = data[idx + 3];
-                    if (alpha > 0) {
+                    // Use threshold to ignore anti-aliased edge pixels
+                    if (alpha > alphaThreshold) {
                         hasOpaquePixels = true;
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
