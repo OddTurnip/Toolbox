@@ -24,31 +24,29 @@
             min-width: 0;
         }
 
-        .output-box {
-            background: #1a202c;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-            position: relative;
+        .output-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .output-box .label {
-            color: #a0aec0;
-            font-size: 0.85em;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .output-box .output {
+        .output-row .output {
+            flex: 1;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 1.4em;
+            font-size: 1.1em;
             color: #68d391;
+            background: #1a202c;
+            padding: 8px 12px;
+            border-radius: 6px;
             word-break: break-all;
-            min-height: 1.5em;
-            line-height: 1.4;
+            min-height: 1.4em;
         }
-        .output-box .placeholder {
+        .output-row .placeholder {
             color: #4a5568;
             font-style: italic;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85em;
         }
 
         .length-control {
@@ -245,21 +243,16 @@
         </header>
 
         <div class="content">
-            <!-- Output Display -->
-            <div class="output-box">
-                <div class="label">Generated String</div>
-                <div class="output" id="output"><span class="placeholder">Click "Generate" to create a random string</span></div>
-            </div>
-
-            <div class="actions-row">
-                <button class="btn btn-primary" onclick="generate()">Generate</button>
-                <button class="btn btn-secondary" onclick="copyOutput()">Copy</button>
-                <button class="btn btn-secondary" onclick="generateMultiple()">Generate 5</button>
-            </div>
-
             <div id="status" class="status"></div>
 
             <div class="form-grid">
+                <div class="form-label">Output:</div>
+                <div class="form-control output-row">
+                    <div class="output" id="output"><span class="placeholder">Click Generate</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="generate()">Generate</button>
+                    <button class="btn btn-secondary btn-sm" onclick="copyOutput()">Copy</button>
+                </div>
+
                 <div class="form-label">Length:</div>
                 <div class="form-control length-control">
                     <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
