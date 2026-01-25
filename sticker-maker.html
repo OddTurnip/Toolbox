@@ -723,8 +723,8 @@
             let finalHeight = canvasHeight;
             let sourceCanvas = tempCanvas;
 
-            // Auto-crop if enabled and background removal is on
-            if (removeBgEnabled.checked && autoCropEnabled.checked) {
+            // Auto-crop if enabled (works with or without background removal)
+            if (autoCropEnabled.checked) {
                 const bbox = findOpaqueBoundingBox(imageData);
                 if (bbox && (bbox.width < canvasWidth || bbox.height < canvasHeight)) {
                     // Crop to bounding box
