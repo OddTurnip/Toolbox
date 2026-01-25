@@ -47,6 +47,28 @@
             padding: 6px 12px;
             font-size: 0.85em;
         }
+        .copy-wrapper {
+            position: relative;
+        }
+        .copy-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            margin-bottom: 5px;
+        }
+        .copy-tooltip.show {
+            opacity: 1;
+        }
 
         .length-control {
             display: flex;
@@ -242,14 +264,15 @@
         </header>
 
         <div class="content">
-            <div id="status" class="status"></div>
-
             <div class="form-grid">
                 <div class="form-label">Output:</div>
                 <div class="form-control output-row">
                     <div class="output" id="output"><span class="placeholder">Click Generate</span></div>
                     <button class="btn btn-primary btn-sm" onclick="generate()">Generate</button>
-                    <button class="btn btn-secondary btn-sm" onclick="copyOutput()">Copy</button>
+                    <span class="copy-wrapper">
+                        <button class="btn btn-secondary btn-sm" onclick="copyOutput()">Copy</button>
+                        <span class="copy-tooltip" id="copyTooltip">Copied!</span>
+                    </span>
                 </div>
 
                 <div class="form-label">Length:</div>
@@ -439,8 +462,7 @@
             const length = parseInt(document.getElementById('lengthInput').value) || 20;
 
             if (pool.length === 0) {
-                output.innerHTML = '<span class="placeholder">Please select at least one character set</span>';
-                showStatus(document.getElementById('status'), 'No character sets selected', 'error');
+                output.innerHTML = '<span class="placeholder">Select at least one character set</span>';
                 return;
             }
 
@@ -457,8 +479,7 @@
             const length = parseInt(document.getElementById('lengthInput').value) || 20;
 
             if (pool.length === 0) {
-                output.innerHTML = '<span class="placeholder">Please select at least one character set</span>';
-                showStatus(document.getElementById('status'), 'No character sets selected', 'error');
+                output.innerHTML = '<span class="placeholder">Select at least one character set</span>';
                 return;
             }
 
@@ -527,16 +548,17 @@
         // Copy to clipboard
         async function copyOutput() {
             const output = document.getElementById('output');
+            const tooltip = document.getElementById('copyTooltip');
             const text = output.textContent;
-            if (!text || text.includes('Click "Generate"') || text.includes('Please select')) {
-                showStatus(document.getElementById('status'), 'Nothing to copy', 'error');
+            if (!text || text.includes('Click Generate') || text.includes('Please select')) {
                 return;
             }
             try {
                 await navigator.clipboard.writeText(text);
-                showStatus(document.getElementById('status'), 'Copied to clipboard!');
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 1500);
             } catch (err) {
-                showStatus(document.getElementById('status'), 'Failed to copy', 'error');
+                // silently fail
             }
         }
 
@@ -591,17 +613,6 @@
             document.getElementById('strengthFill').style.width = width + '%';
             document.getElementById('strengthFill').className = 'strength-fill ' + color;
             document.getElementById('strengthText').textContent = strength;
-        }
-
-        // Show status message
-        function showStatus(element, message, type = 'success') {
-            element.textContent = message;
-            element.className = 'status ' + type;
-            if (type === 'success') {
-                setTimeout(() => {
-                    element.className = 'status';
-                }, 2000);
-            }
         }
 
         // Initialize
