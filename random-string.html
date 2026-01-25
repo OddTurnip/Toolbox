@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random String Generator - Utilities</title>
+    <link rel="icon" type="image/x-icon" href="https://oddturnip.com/favicon_turnip.ico">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Page-specific styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 8px 15px;
+            align-items: start;
+        }
+        .form-grid .form-label {
+            font-weight: 600;
+            color: #333;
+            padding-top: 4px;
+        }
+        .form-grid .form-control {
+            min-width: 0;
+        }
+
+        .output-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .output-row .output {
+            flex: 1;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.1em;
+            color: #68d391;
+            background: #1a202c;
+            padding: 8px 12px;
+            border-radius: 6px;
+            word-break: break-all;
+            min-height: 1.4em;
+        }
+        .output-row .placeholder {
+            color: #4a5568;
+            font-style: italic;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+        .copy-wrapper {
+            position: relative;
+        }
+        .copy-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            margin-bottom: 5px;
+        }
+        .copy-tooltip.show {
+            opacity: 1;
+        }
+
+        .length-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .length-control input[type="range"] {
+            flex: 1;
+            min-width: 100px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            outline: none;
+        }
+        .length-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .length-control input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .length-control input[type="number"] {
+            width: 65px;
+            padding: 5px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            text-align: center;
+            font-weight: 600;
+        }
+        .length-control input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .charset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px;
+        }
+        .charset-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+        .charset-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .charset-item.checked {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .charset-item input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        .charset-item .charset-label {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+        }
+        .charset-item .charset-preview {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .hint {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .presets {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .preset-btn {
+            padding: 4px 10px;
+            background: #f0f4ff;
+            border: 1px solid #d0d0d0;
+            border-radius: 12px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #333;
+            font-weight: 500;
+        }
+        .preset-btn:hover {
+            border-color: #667eea;
+            background: #e8edff;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .strength-meter {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 6px;
+        }
+        .strength-meter .strength-label {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .strength-bar {
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        .strength-text {
+            margin-top: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .strength-weak { background: #e53e3e; }
+        .strength-fair { background: #dd6b20; }
+        .strength-good { background: #d69e2e; }
+        .strength-strong { background: #38a169; }
+        .strength-excellent { background: #667eea; }
+
+        .entropy-info {
+            display: flex;
+            gap: 15px;
+            margin-top: 4px;
+            font-size: 0.75em;
+            color: #666;
+        }
+        .info-box {
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .info-box h4 {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <img src="https://oddturnip.com/img/odd_turnip_480.png" alt="OddTurnip Logo" class="header-logo">
+                Random String Generator
+            </h1>
+            <p>Generate secure passwords, API keys, tokens, and more</p>
+        </header>
+
+        <div class="content">
+            <div class="form-grid">
+                <div class="form-label">Output:</div>
+                <div class="form-control output-row">
+                    <div class="output" id="output"><span class="placeholder">Click Generate</span></div>
+                    <button class="btn btn-primary btn-sm" onclick="generate()">Generate</button>
+                    <span class="copy-wrapper">
+                        <button class="btn btn-secondary btn-sm" onclick="copyOutput()">Copy</button>
+                        <span class="copy-tooltip" id="copyTooltip">Copied!</span>
+                    </span>
+                </div>
+
+                <div class="form-label">Length:</div>
+                <div class="form-control length-control">
+                    <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
+                    <input type="number" id="lengthInput" min="1" max="512" value="20" oninput="syncLengthFromInput(this.value)">
+                </div>
+
+                <div class="form-label">Presets:</div>
+                <div class="form-control presets">
+                    <button class="preset-btn" onclick="applyPreset('password')">Password (16)</button>
+                    <button class="preset-btn" onclick="applyPreset('strong')">Strong (24)</button>
+                    <button class="preset-btn" onclick="applyPreset('pin')">PIN (6)</button>
+                    <button class="preset-btn" onclick="applyPreset('hex')">Hex (32)</button>
+                    <button class="preset-btn" onclick="applyPreset('api')">API Key (40)</button>
+                    <button class="preset-btn" onclick="applyPreset('uuid')">UUID v4</button>
+                </div>
+
+                <div class="form-label">Characters:</div>
+                <div class="form-control charset-grid">
+                    <label class="charset-item checked">
+                        <input type="checkbox" id="uppercase" checked onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Upper</span>
+                        <span class="charset-preview">A-Z</span>
+                    </label>
+                    <label class="charset-item checked">
+                        <input type="checkbox" id="lowercase" checked onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Lower</span>
+                        <span class="charset-preview">a-z</span>
+                    </label>
+                    <label class="charset-item checked">
+                        <input type="checkbox" id="digits" checked onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Digits</span>
+                        <span class="charset-preview">0-9</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="special" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Special</span>
+                        <span class="charset-preview">!@#$</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="minus" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Minus</span>
+                        <span class="charset-preview">-</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="underline" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Underline</span>
+                        <span class="charset-preview">_</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="brackets" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Brackets</span>
+                        <span class="charset-preview">[]{}()</span>
+                    </label>
+                    <label class="charset-item">
+                        <input type="checkbox" id="space" onchange="updateCharsetUI(this)">
+                        <span class="charset-label">Space</span>
+                    </label>
+                </div>
+
+                <div class="form-label">Custom:</div>
+                <div class="form-control">
+                    <input type="text" id="customChars" class="text-input" placeholder="Extra characters to include...">
+                </div>
+
+                <div class="form-label">Pattern:</div>
+                <div class="form-control">
+                    <input type="text" id="pattern" class="text-input" placeholder="e.g. xxxx-xxxx-xxxx (x = random char)">
+                </div>
+            </div>
+
+            <!-- Strength Meter -->
+            <div class="strength-meter">
+                <div class="strength-label">Password Strength</div>
+                <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill" style="width: 0%"></div>
+                </div>
+                <div class="strength-text" id="strengthText">-</div>
+                <div class="entropy-info">
+                    <span>Entropy: <strong id="entropyBits">-</strong> bits</span>
+                    <span>Pool size: <strong id="poolSize">-</strong> characters</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>About This Tool</h4>
+                <p>Locally generate cryptographically secure random strings using the Web Crypto API in your browser.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="index.html">&larr; Back to Utilities</a>
+                <a href="https://www.oddturnip.com" target="_blank" class="oddturnip-link">
+                    <img src="https://oddturnip.com/img/odd_turnip_48.png" alt="OddTurnip Logo">
+                    <span>Created by OddTurnip.com</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Character set definitions
+        const CHARSETS = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            digits: '0123456789',
+            minus: '-',
+            underline: '_',
+            space: ' ',
+            special: '!@#$%^&*+=?',
+            brackets: '[]{}()<>'
+        };
+
+        const HEX_CHARS = '0123456789abcdef';
+
+        // Sync length slider and input
+        function syncLength(value) {
+            document.getElementById('lengthInput').value = value;
+            updateStrength();
+        }
+
+        function syncLengthFromInput(value) {
+            const num = parseInt(value) || 1;
+            const clamped = Math.min(512, Math.max(1, num));
+            document.getElementById('lengthSlider').value = Math.min(128, clamped);
+            document.getElementById('lengthInput').value = clamped;
+            updateStrength();
+        }
+
+        // Update checkbox visual state
+        function updateCharsetUI(checkbox) {
+            const item = checkbox.closest('.charset-item');
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+            updateStrength();
+        }
+
+        // Build character pool from selected options
+        function getCharacterPool() {
+            let pool = '';
+            for (const [id, chars] of Object.entries(CHARSETS)) {
+                if (document.getElementById(id).checked) {
+                    pool += chars;
+                }
+            }
+            // Add custom characters
+            const custom = document.getElementById('customChars').value;
+            pool += custom;
+            // Remove duplicates
+            return [...new Set(pool)].join('');
+        }
+
+        // Generate cryptographically secure random string
+        function generateRandomString(length, charset) {
+            if (!charset || charset.length === 0) {
+                return '';
+            }
+            const array = new Uint32Array(length);
+            crypto.getRandomValues(array);
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += charset[array[i] % charset.length];
+            }
+            return result;
+        }
+
+        // Generate from pattern ('x' = random char from pool)
+        function generateFromPattern(pattern, charset) {
+            if (!charset || charset.length === 0) return pattern;
+            const xCount = (pattern.match(/x/g) || []).length;
+            const array = new Uint32Array(xCount);
+            crypto.getRandomValues(array);
+            let i = 0;
+            return pattern.replace(/x/g, () => charset[array[i++] % charset.length]);
+        }
+
+        // Main generate function
+        function generate() {
+            const output = document.getElementById('output');
+            const pool = getCharacterPool();
+            const pattern = document.getElementById('pattern').value.trim();
+            const length = parseInt(document.getElementById('lengthInput').value) || 20;
+
+            if (pool.length === 0) {
+                output.innerHTML = '<span class="placeholder">Select at least one character set</span>';
+                return;
+            }
+
+            const result = pattern ? generateFromPattern(pattern, pool) : generateRandomString(length, pool);
+            output.textContent = result;
+            updateStrength();
+        }
+
+        // Generate multiple strings
+        function generateMultiple() {
+            const output = document.getElementById('output');
+            const pool = getCharacterPool();
+            const pattern = document.getElementById('pattern').value.trim();
+            const length = parseInt(document.getElementById('lengthInput').value) || 20;
+
+            if (pool.length === 0) {
+                output.innerHTML = '<span class="placeholder">Select at least one character set</span>';
+                return;
+            }
+
+            const results = [];
+            for (let i = 0; i < 5; i++) {
+                results.push(pattern ? generateFromPattern(pattern, pool) : generateRandomString(length, pool));
+            }
+            output.innerHTML = results.join('<br>');
+            updateStrength();
+        }
+
+        // Apply presets
+        function applyPreset(preset) {
+            // Reset all checkboxes
+            Object.keys(CHARSETS).forEach(id => {
+                document.getElementById(id).checked = false;
+                document.getElementById(id).closest('.charset-item').classList.remove('checked');
+            });
+            document.getElementById('customChars').value = '';
+            document.getElementById('pattern').value = '';
+
+            switch (preset) {
+                case 'password':
+                    setLength(16);
+                    checkSets(['uppercase', 'lowercase', 'digits']);
+                    break;
+                case 'strong':
+                    setLength(24);
+                    checkSets(['uppercase', 'lowercase', 'digits', 'special']);
+                    break;
+                case 'pin':
+                    setLength(6);
+                    checkSets(['digits']);
+                    break;
+                case 'hex':
+                    setLength(32);
+                    checkSets(['digits']);
+                    document.getElementById('customChars').value = 'abcdef';
+                    break;
+                case 'api':
+                    setLength(40);
+                    checkSets(['uppercase', 'lowercase', 'digits']);
+                    break;
+                case 'uuid':
+                    checkSets(['digits']);
+                    document.getElementById('customChars').value = 'abcdef';
+                    document.getElementById('pattern').value = 'xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx';
+                    break;
+            }
+            generate();
+        }
+
+        function setLength(len) {
+            document.getElementById('lengthInput').value = len;
+            document.getElementById('lengthSlider').value = Math.min(128, len);
+        }
+
+        function checkSets(sets) {
+            sets.forEach(id => {
+                const checkbox = document.getElementById(id);
+                checkbox.checked = true;
+                checkbox.closest('.charset-item').classList.add('checked');
+            });
+        }
+
+        // Copy to clipboard
+        async function copyOutput() {
+            const output = document.getElementById('output');
+            const tooltip = document.getElementById('copyTooltip');
+            const text = output.textContent;
+            if (!text || text.includes('Click Generate') || text.includes('Please select')) {
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 1500);
+            } catch (err) {
+                // silently fail
+            }
+        }
+
+        // Calculate and display strength
+        function updateStrength() {
+            const pool = getCharacterPool();
+            const pattern = document.getElementById('pattern').value.trim();
+            const length = pattern ? (pattern.match(/x/g) || []).length : (parseInt(document.getElementById('lengthInput').value) || 0);
+
+            document.getElementById('poolSize').textContent = pool.length;
+
+            if (pool.length === 0 || length === 0) {
+                document.getElementById('entropyBits').textContent = '0';
+                document.getElementById('strengthFill').style.width = '0%';
+                document.getElementById('strengthFill').className = 'strength-fill';
+                document.getElementById('strengthText').textContent = '-';
+                return;
+            }
+
+            // Calculate entropy
+            const entropy = Math.log2(pool.length) * length;
+            document.getElementById('entropyBits').textContent = entropy.toFixed(1);
+
+            // Determine strength level
+            let strength, color, width;
+            if (entropy < 28) {
+                strength = 'Very Weak';
+                color = 'strength-weak';
+                width = 10;
+            } else if (entropy < 36) {
+                strength = 'Weak';
+                color = 'strength-weak';
+                width = 25;
+            } else if (entropy < 60) {
+                strength = 'Fair';
+                color = 'strength-fair';
+                width = 40;
+            } else if (entropy < 80) {
+                strength = 'Good';
+                color = 'strength-good';
+                width = 60;
+            } else if (entropy < 128) {
+                strength = 'Strong';
+                color = 'strength-strong';
+                width = 80;
+            } else {
+                strength = 'Excellent';
+                color = 'strength-excellent';
+                width = 100;
+            }
+
+            document.getElementById('strengthFill').style.width = width + '%';
+            document.getElementById('strengthFill').className = 'strength-fill ' + color;
+            document.getElementById('strengthText').textContent = strength;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStrength();
+            document.getElementById('customChars').addEventListener('input', updateStrength);
+            document.getElementById('pattern').addEventListener('input', updateStrength);
+        });
+    </script>
+</body>
+</html>
