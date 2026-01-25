@@ -501,7 +501,14 @@
 
         // Apply presets
         function applyPreset(preset) {
-            // Reset all checkboxes
+            // UUID is a special format - generate directly without changing settings
+            if (preset === 'uuid') {
+                document.getElementById('output').textContent = generateUUID();
+                updateStrengthForUUID();
+                return;
+            }
+
+            // Reset all checkboxes for other presets
             Object.keys(CHARSETS).forEach(id => {
                 document.getElementById(id).checked = false;
                 document.getElementById(id).closest('.charset-item').classList.remove('checked');
@@ -523,17 +530,13 @@
                     break;
                 case 'hex':
                     setLength(32);
-                    document.getElementById('customChars').value = HEX_CHARS;
+                    checkSets(['digits']);
+                    document.getElementById('customChars').value = 'abcdef';
                     break;
                 case 'api':
                     setLength(40);
                     checkSets(['uppercase', 'lowercase', 'digits']);
                     break;
-                case 'uuid':
-                    const uuid = generateUUID();
-                    document.getElementById('output').textContent = uuid;
-                    updateStrengthForUUID();
-                    return;
             }
             generate();
         }
