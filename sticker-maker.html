@@ -283,6 +283,12 @@
                                     <span class="slider-value" id="bgToleranceValue">30</span>
                                 </div>
                             </div>
+                            <div class="control-row">
+                                <div class="checkbox-row">
+                                    <input type="checkbox" id="autoCropEnabled" checked>
+                                    <label for="autoCropEnabled">Auto-crop transparent areas</label>
+                                </div>
+                            </div>
                             <div class="position-hint">Click image to pick background color</div>
                             <div class="pick-mode-hint" id="pickModeHint" style="display: none;">Click on the image to select background color...</div>
                         </div>
@@ -404,6 +410,7 @@
         const bgTolerance = document.getElementById('bgTolerance');
         const bgToleranceValue = document.getElementById('bgToleranceValue');
         const pickModeHint = document.getElementById('pickModeHint');
+        const autoCropEnabled = document.getElementById('autoCropEnabled');
 
         // Border controls
         const borderEnabled = document.getElementById('borderEnabled');
@@ -484,6 +491,42 @@
                 }
             }
             return imageData;
+        }
+
+        // Find bounding box of non-transparent pixels
+        function findOpaqueBoundingBox(imageData, alphaThreshold = 10) {
+            const w = imageData.width;
+            const h = imageData.height;
+            const data = imageData.data;
+
+            let minX = w, minY = h, maxX = 0, maxY = 0;
+            let hasOpaquePixels = false;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const alpha = data[idx + 3];
+                    // Use threshold to ignore anti-aliased edge pixels
+                    if (alpha > alphaThreshold) {
+                        hasOpaquePixels = true;
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            if (!hasOpaquePixels) {
+                return null;
+            }
+
+            return {
+                x: minX,
+                y: minY,
+                width: maxX - minX + 1,
+                height: maxY - minY + 1
+            };
         }
 
         // Create dilated border mask
@@ -659,10 +702,6 @@
         function renderCanvas() {
             if (!baseImage) return;
 
-            outputCanvas.width = canvasWidth;
-            outputCanvas.height = canvasHeight;
-            const ctx = outputCanvas.getContext('2d');
-
             // Start with base image on a temp canvas for processing
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvasWidth;
@@ -680,6 +719,48 @@
                 tempCtx.putImageData(imageData, 0, 0);
             }
 
+            // Determine final dimensions and source for drawing
+            let finalWidth = canvasWidth;
+            let finalHeight = canvasHeight;
+            let sourceCanvas = tempCanvas;
+
+            // Auto-crop if enabled (works with or without background removal)
+            if (autoCropEnabled.checked) {
+                const bbox = findOpaqueBoundingBox(imageData);
+                if (bbox && (bbox.width < canvasWidth || bbox.height < canvasHeight)) {
+                    // Crop to bounding box
+                    const croppedCanvas = document.createElement('canvas');
+                    croppedCanvas.width = bbox.width;
+                    croppedCanvas.height = bbox.height;
+                    const croppedCtx = croppedCanvas.getContext('2d');
+                    croppedCtx.drawImage(tempCanvas, bbox.x, bbox.y, bbox.width, bbox.height, 0, 0, bbox.width, bbox.height);
+
+                    // Resize to fit 512px
+                    if (bbox.width > bbox.height) {
+                        finalWidth = MAX_SIZE;
+                        finalHeight = Math.round((bbox.height / bbox.width) * MAX_SIZE);
+                    } else {
+                        finalHeight = MAX_SIZE;
+                        finalWidth = Math.round((bbox.width / bbox.height) * MAX_SIZE);
+                    }
+
+                    // Create resized canvas
+                    const resizedCanvas = document.createElement('canvas');
+                    resizedCanvas.width = finalWidth;
+                    resizedCanvas.height = finalHeight;
+                    const resizedCtx = resizedCanvas.getContext('2d');
+                    resizedCtx.drawImage(croppedCanvas, 0, 0, finalWidth, finalHeight);
+
+                    sourceCanvas = resizedCanvas;
+                    imageData = resizedCtx.getImageData(0, 0, finalWidth, finalHeight);
+                }
+            }
+
+            // Set output canvas dimensions
+            outputCanvas.width = finalWidth;
+            outputCanvas.height = finalHeight;
+            const ctx = outputCanvas.getContext('2d');
+
             // Apply border if enabled (must be after background removal)
             if (borderEnabled.checked && removeBgEnabled.checked) {
                 const borderPx = parseInt(borderSize.value);
@@ -690,11 +771,14 @@
                 ctx.putImageData(borderData, 0, 0);
 
                 // Draw processed image on top
-                ctx.drawImage(tempCanvas, 0, 0);
+                ctx.drawImage(sourceCanvas, 0, 0);
             } else {
                 // Just draw the (possibly processed) image
-                ctx.drawImage(tempCanvas, 0, 0);
+                ctx.drawImage(sourceCanvas, 0, 0);
             }
+
+            // Update dimensions display
+            dimensions.textContent = `${finalWidth} x ${finalHeight}`;
 
             // Get text settings
             const fontSize = parseInt(fontSizeInput.value) || 36;
@@ -710,17 +794,17 @@
             // Draw top text
             const topText = topTextInput.value;
             if (topText) {
-                const topX = topTextPos.x * canvasWidth;
-                const topY = topTextPos.y * canvasHeight;
-                drawText(ctx, topText, topX, topY, textColor, shadowEnabled, shadowColor, fontSize);
+                const topX = topTextPos.x * finalWidth;
+                const topY = topTextPos.y * finalHeight;
+                drawText(ctx, topText, topX, topY, textColor, shadowEnabled, shadowColor, fontSize, finalWidth);
             }
 
             // Draw bottom text
             const bottomText = bottomTextInput.value;
             if (bottomText) {
-                const bottomX = bottomTextPos.x * canvasWidth;
-                const bottomY = bottomTextPos.y * canvasHeight;
-                drawText(ctx, bottomText, bottomX, bottomY, textColor, shadowEnabled, shadowColor, fontSize);
+                const bottomX = bottomTextPos.x * finalWidth;
+                const bottomY = bottomTextPos.y * finalHeight;
+                drawText(ctx, bottomText, bottomX, bottomY, textColor, shadowEnabled, shadowColor, fontSize, finalWidth);
             }
         }
 
@@ -755,9 +839,9 @@
             return lines;
         }
 
-        function drawText(ctx, text, x, y, color, shadowEnabled, shadowColor, fontSize) {
+        function drawText(ctx, text, x, y, color, shadowEnabled, shadowColor, fontSize, width) {
             const padding = 10;
-            const maxWidth = canvasWidth - (padding * 2);
+            const maxWidth = width - (padding * 2);
             const lines = wrapText(ctx, text, maxWidth);
             const lineHeight = fontSize * 1.2;
             const totalHeight = lines.length * lineHeight;
@@ -785,13 +869,15 @@
 
         function updateTextPosition(e) {
             const rect = outputCanvas.getBoundingClientRect();
-            const scaleX = canvasWidth / rect.width;
-            const scaleY = canvasHeight / rect.height;
+            const currentWidth = outputCanvas.width;
+            const currentHeight = outputCanvas.height;
+            const scaleX = currentWidth / rect.width;
+            const scaleY = currentHeight / rect.height;
             const x = (e.clientX - rect.left) * scaleX;
             const y = (e.clientY - rect.top) * scaleY;
 
-            const posX = x / canvasWidth;
-            const posY = y / canvasHeight;
+            const posX = x / currentWidth;
+            const posY = y / currentHeight;
 
             if (getPositionMode() === 'top') {
                 topTextPos = { x: posX, y: posY };
@@ -806,10 +892,15 @@
             // Check if we're in color picking mode
             if (isPickingColor) {
                 const rect = outputCanvas.getBoundingClientRect();
+                // Use original canvas dimensions for sampling from base image
                 const scaleX = canvasWidth / rect.width;
                 const scaleY = canvasHeight / rect.height;
-                const x = Math.floor((e.clientX - rect.left) * scaleX);
-                const y = Math.floor((e.clientY - rect.top) * scaleY);
+                let x = Math.floor((e.clientX - rect.left) * scaleX);
+                let y = Math.floor((e.clientY - rect.top) * scaleY);
+
+                // Clamp to valid range
+                x = Math.max(0, Math.min(canvasWidth - 1, x));
+                y = Math.max(0, Math.min(canvasHeight - 1, y));
 
                 // Get color from base image (not processed canvas)
                 const tempCanvas = document.createElement('canvas');
@@ -858,6 +949,7 @@
             bgToleranceValue.textContent = bgTolerance.value;
             renderCanvas();
         });
+        autoCropEnabled.addEventListener('change', renderCanvas);
 
         // Click swatch to enter color picking mode
         bgColorSwatch.addEventListener('click', () => {
@@ -916,6 +1008,7 @@
             updateColorSwatch(detectedBgColor);
             isPickingColor = false;
             pickModeHint.style.display = 'none';
+            autoCropEnabled.checked = true;
 
             // Reset border
             borderEnabled.checked = false;
