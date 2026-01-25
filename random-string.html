@@ -9,12 +9,14 @@
     <style>
         /* Page-specific styles */
         .control-group {
-            padding: 15px;
+            background: none;
+            padding: 0;
             margin-bottom: 12px;
         }
         .control-group h4 {
-            margin-bottom: 10px;
-            padding-bottom: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 0;
+            border-bottom: none;
         }
         .output-box {
             background: #1a202c;
@@ -48,11 +50,11 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+            margin-bottom: 12px;
         }
         .length-control label {
             color: #333;
             font-weight: 600;
-            min-width: 60px;
         }
         .length-control input[type="range"] {
             flex: 1;
@@ -275,13 +277,10 @@
             <div id="status" class="status"></div>
 
             <!-- Length Control -->
-            <div class="control-group" style="margin-top: 12px;">
-                <h4>Length</h4>
-                <div class="length-control">
-                    <label>Characters:</label>
-                    <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
-                    <input type="number" id="lengthInput" min="1" max="512" value="20" oninput="syncLengthFromInput(this.value)">
-                </div>
+            <div class="length-control" style="margin-top: 12px;">
+                <label>Length:</label>
+                <input type="range" id="lengthSlider" min="1" max="128" value="20" oninput="syncLength(this.value)">
+                <input type="number" id="lengthInput" min="1" max="512" value="20" oninput="syncLengthFromInput(this.value)">
             </div>
 
             <!-- Quick Presets -->
