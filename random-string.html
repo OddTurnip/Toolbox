@@ -345,7 +345,12 @@
                 <div class="custom-chars">
                     <label for="customChars">Additional Characters:</label>
                     <input type="text" id="customChars" placeholder="Add any extra characters to include...">
-                    <div class="hint">Characters entered here will be added to the character pool</div>
+                </div>
+
+                <div class="custom-chars">
+                    <label for="pattern">Pattern (optional):</label>
+                    <input type="text" id="pattern" placeholder="e.g. xxxx-xxxx-xxxx or xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx">
+                    <div class="hint">Use 'x' for random characters from pool, other characters are literal</div>
                 </div>
             </div>
 
@@ -450,22 +455,21 @@
             return result;
         }
 
-        // Generate UUID v4
-        function generateUUID() {
-            const array = new Uint8Array(16);
+        // Generate from pattern ('x' = random char from pool)
+        function generateFromPattern(pattern, charset) {
+            if (!charset || charset.length === 0) return pattern;
+            const xCount = (pattern.match(/x/g) || []).length;
+            const array = new Uint32Array(xCount);
             crypto.getRandomValues(array);
-            // Set version (4) and variant (10xx)
-            array[6] = (array[6] & 0x0f) | 0x40;
-            array[8] = (array[8] & 0x3f) | 0x80;
-
-            const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
-            return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+            let i = 0;
+            return pattern.replace(/x/g, () => charset[array[i++] % charset.length]);
         }
 
         // Main generate function
         function generate() {
             const output = document.getElementById('output');
             const pool = getCharacterPool();
+            const pattern = document.getElementById('pattern').value.trim();
             const length = parseInt(document.getElementById('lengthInput').value) || 20;
 
             if (pool.length === 0) {
@@ -474,7 +478,7 @@
                 return;
             }
 
-            const result = generateRandomString(length, pool);
+            const result = pattern ? generateFromPattern(pattern, pool) : generateRandomString(length, pool);
             output.textContent = result;
             updateStrength();
         }
@@ -483,6 +487,7 @@
         function generateMultiple() {
             const output = document.getElementById('output');
             const pool = getCharacterPool();
+            const pattern = document.getElementById('pattern').value.trim();
             const length = parseInt(document.getElementById('lengthInput').value) || 20;
 
             if (pool.length === 0) {
@@ -493,7 +498,7 @@
 
             const results = [];
             for (let i = 0; i < 5; i++) {
-                results.push(generateRandomString(length, pool));
+                results.push(pattern ? generateFromPattern(pattern, pool) : generateRandomString(length, pool));
             }
             output.innerHTML = results.join('<br>');
             updateStrength();
@@ -501,19 +506,13 @@
 
         // Apply presets
         function applyPreset(preset) {
-            // UUID is a special format - generate directly without changing settings
-            if (preset === 'uuid') {
-                document.getElementById('output').textContent = generateUUID();
-                updateStrengthForUUID();
-                return;
-            }
-
-            // Reset all checkboxes for other presets
+            // Reset all checkboxes
             Object.keys(CHARSETS).forEach(id => {
                 document.getElementById(id).checked = false;
                 document.getElementById(id).closest('.charset-item').classList.remove('checked');
             });
             document.getElementById('customChars').value = '';
+            document.getElementById('pattern').value = '';
 
             switch (preset) {
                 case 'password':
@@ -536,6 +535,11 @@
                 case 'api':
                     setLength(40);
                     checkSets(['uppercase', 'lowercase', 'digits']);
+                    break;
+                case 'uuid':
+                    checkSets(['digits']);
+                    document.getElementById('customChars').value = 'abcdef';
+                    document.getElementById('pattern').value = 'xxxxxxxx-xxxx-4xxx-xxxx-xxxxxxxxxxxx';
                     break;
             }
             generate();
@@ -573,7 +577,8 @@
         // Calculate and display strength
         function updateStrength() {
             const pool = getCharacterPool();
-            const length = parseInt(document.getElementById('lengthInput').value) || 0;
+            const pattern = document.getElementById('pattern').value.trim();
+            const length = pattern ? (pattern.match(/x/g) || []).length : (parseInt(document.getElementById('lengthInput').value) || 0);
 
             document.getElementById('poolSize').textContent = pool.length;
 
@@ -622,15 +627,6 @@
             document.getElementById('strengthText').textContent = strength;
         }
 
-        function updateStrengthForUUID() {
-            // UUID v4 has 122 bits of randomness
-            document.getElementById('poolSize').textContent = '16 (hex)';
-            document.getElementById('entropyBits').textContent = '122';
-            document.getElementById('strengthFill').style.width = '95%';
-            document.getElementById('strengthFill').className = 'strength-fill strength-excellent';
-            document.getElementById('strengthText').textContent = 'Excellent (UUID v4)';
-        }
-
         // Show status message
         function showStatus(element, message, type = 'success') {
             element.textContent = message;
@@ -645,8 +641,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             updateStrength();
-            // Listen for custom chars changes
             document.getElementById('customChars').addEventListener('input', updateStrength);
+            document.getElementById('pattern').addEventListener('input', updateStrength);
         });
     </script>
 </body>
